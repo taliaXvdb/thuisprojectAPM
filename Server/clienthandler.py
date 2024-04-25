@@ -26,12 +26,17 @@ class ClientHandler(threading.Thread):
         while commando != "CLOSE":
             self.print_bericht_gui_server(f"Commando received: {commando}")
             message, (naam, wachtwoord) = pickle.loads(commando)
+            message, search = pickle.loads(commando)
 
             self.print_bericht_gui_server(f"Message received: {message} {naam} {wachtwoord}")
 
             if message == "LOGIN":
                 self.print_bericht_gui_server("Login...")
                 self.login(naam, wachtwoord)
+
+            elif message == "SEARCH":
+                self.print_bericht_gui_server("Search...")
+                self.search(search)
 
         self.print_bericht_gui_server("Connection with client closed...")
         self.socket_to_client.close()
@@ -57,4 +62,9 @@ class ClientHandler(threading.Thread):
             pickle.dump("NOK", self.socket_to_client)
             self.socket_to_client.flush()
         self.print_bericht_gui_server(f"Login {naam} {wachtwoord}")
+        return
+    
+    def search(self, search):
+        self.print_bericht_gui_server(f"Search {search}")
+        print("DEBUG:", search)
         return

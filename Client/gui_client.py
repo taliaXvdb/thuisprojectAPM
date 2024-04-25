@@ -115,10 +115,40 @@ class Window(Frame):
 
         # dropdown with possible searches
         self.combobox_searches = Combobox(self)
-        self.combobox_searches['values'] = ["Search 1", "Search 2", "Search 3"]
+        self.combobox_searches['values'] = ["Grafiek van de grootte van de appels", "Heeft de appel met deze rijpheid een goede kwaliteit", "Hoe zoet is de appel met deze zuurtegraad", "Hoe krokant is een appel met deze rijpheid"]
         self.combobox_searches.current(0)
 
-        
+        self.combobox_searches.grid(row=1, column=1, sticky=E + W, padx=(5, 5), pady=(5, 5))
+
+        self.buttonCalculate = Button(self, text="Search", command=self.search)
+
+        self.buttonCalculate.grid(row=3, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=N + S + E + W)
+
+        Grid.rowconfigure(self, 3, weight=1)
+        Grid.columnconfigure(self, 1, weight=1)
+
+    def search(self):
+        search = self.combobox_searches.get()
+        messagebox.showinfo("Search", f"Searching for {search}...")
+
+        try:
+            logging.info("Sending search data to server...")
+            search_to_send = pickle.dumps(("SEARCH", search))
+            pickle.dump(search_to_send, self.in_out_server)
+            self.in_out_server.flush()
+            logging.info("Search data sent to server succesfully")
+
+            logging.info("Waiting for response from server...")
+
+            commando = pickle.load(self.in_out_server)
+            logging.info(f"Commando received: {commando}")
+            if commando == "OK":
+                messagebox.showinfo("Search", "Search succesful")
+            else:
+                messagebox.showinfo("Search", "Search failed")
+        except Exception as ex:
+            logging.error(f"Foutmelding Client: {ex}")
+            messagebox.showinfo("Foutmelding", "Something has gone wrong...")
 
 
 logging.basicConfig(level=logging.INFO)
