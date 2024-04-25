@@ -90,12 +90,35 @@ class Window(Frame):
             commando = pickle.load(self.in_out_server)
             logging.info(f"Commando received: {commando}")
             if commando == "OK":
-                messagebox.showinfo("Login", "Login succesful")
+                result = messagebox.showinfo("Login", "Login succesful")
+                if result == "ok":
+                    self.show_main_window()
             else:
                 messagebox.showinfo("Login", "Login failed")
         except Exception as ex:
             logging.error(f"Foutmelding Client: {ex}")
             messagebox.showinfo("Foutmelding", "Something has gone wrong...")
+
+    def show_main_window(self):
+        logging.info("Close current window")
+
+        for widget in self.winfo_children():
+            widget.destroy()
+        
+        #make new window
+        self.master.title("Main")
+
+        self.pack(fill=BOTH, expand=1)
+
+        Label(self, text="Main window").grid(row=0)
+        Label(self, text="Search:", pady=10).grid(row=1)
+
+        # dropdown with possible searches
+        self.combobox_searches = Combobox(self)
+        self.combobox_searches['values'] = ["Search 1", "Search 2", "Search 3"]
+        self.combobox_searches.current(0)
+
+        
 
 
 logging.basicConfig(level=logging.INFO)
