@@ -22,13 +22,11 @@ class ClientHandler(threading.Thread):
         self.print_bericht_gui_server("Waiting for login...")
         commando = pickle.load(self.socket_to_client)
         print(commando)
+        self.print_bericht_gui_server(f"Commando received: {commando}")
 
         while commando != "CLOSE":
-            self.print_bericht_gui_server(f"Commando received: {commando}")
             message, (naam, wachtwoord) = pickle.loads(commando)
             message, search = pickle.loads(commando)
-
-            self.print_bericht_gui_server(f"Message received: {message} {naam} {wachtwoord}")
 
             if message == "LOGIN":
                 self.print_bericht_gui_server("Login...")
@@ -37,6 +35,8 @@ class ClientHandler(threading.Thread):
             elif message == "SEARCH":
                 self.print_bericht_gui_server("Search...")
                 self.search(search)
+
+            previous_command = commando
 
         self.print_bericht_gui_server("Connection with client closed...")
         self.socket_to_client.close()
@@ -51,8 +51,6 @@ class ClientHandler(threading.Thread):
         }
     
     def login(self, naam, wachtwoord):
-        self.print_bericht_gui_server(f"Login {naam} {wachtwoord}")
-        print("DEBUG:", naam, wachtwoord)
         if naam == "admin" and wachtwoord == "admin":
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
@@ -61,10 +59,22 @@ class ClientHandler(threading.Thread):
             self.print_bericht_gui_server(f"NOK")
             pickle.dump("NOK", self.socket_to_client)
             self.socket_to_client.flush()
-        self.print_bericht_gui_server(f"Login {naam} {wachtwoord}")
         return
     
     def search(self, search):
         self.print_bericht_gui_server(f"Search {search}")
         print("DEBUG:", search)
+
+        if search == "Grafiek van de grootte van de appels":
+            self.print_bericht_gui_server("wauw grafiek")
+
+        elif search == "Heeft de appel met deze rijpheid een goede kwaliteit":
+            self.print_bericht_gui_server("wauw kwaliteit")
+
+        elif search == "Hoe zoet is de appel met deze zuurtegraad":
+            self.print_bericht_gui_server("wauw zoet")
+
+        elif search == "Hoe krokant is een appel met deze rijpheid":
+            self.print_bericht_gui_server("wauw krokant")
+
         return
