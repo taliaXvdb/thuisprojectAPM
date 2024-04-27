@@ -14,6 +14,7 @@ class Window(tk.Frame):
         self.master = master
         self.init_window()
         self.make_connection_with_server()
+        self.current_user = None
 
     def init_window(self):
         self.master.title("Login")
@@ -73,12 +74,15 @@ class Window(tk.Frame):
 
             commando = pickle.load(self.in_out_server)
             logging.info(f"Command received: {commando}")
+
             if commando == "OK":
                 result = messagebox.showinfo("Login", "Login successful")
                 if result == "ok":
+                    self.current_user = naam
                     self.show_main_window()
             else:
                 messagebox.showinfo("Login", "Login failed")
+
         except Exception as ex:
             logging.error(f"Error: {ex}")
             messagebox.showinfo("Error", "Something has gone wrong...")
@@ -91,8 +95,18 @@ class Window(tk.Frame):
         self.master.title("Main")
         self.pack(fill=tk.BOTH, expand=1)
 
+        self.top_bar = tk.Frame(self)  # Frame for the top bar
+        self.top_bar.pack(side=tk.TOP, fill=tk.X)
+
+        self.label_user = tk.Label(self.top_bar, text=f"Ingelogd als: {self.current_user}")
+        self.label_user.pack(side=tk.LEFT, padx=(5, 5))
+
+        self.button_logout = tk.Button(self.top_bar, text="Logout", command=self.logout)
+        self.button_logout.pack(side=tk.RIGHT, padx=(5, 5))
+
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=1)
+
 
         # Define a list of all possible searches
         searches = [
@@ -174,6 +188,10 @@ class Window(tk.Frame):
         canvas = FigureCanvasTkAgg(fig, master=parent)
         canvas.draw()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    def logout(self):
+        self.close_connection()
+        self.master.destroy()
 
 
 logging.basicConfig(level=logging.INFO)
