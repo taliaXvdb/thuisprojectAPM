@@ -109,6 +109,7 @@ class Window(tk.Frame):
 
         # Bind the tab changed event
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+        
 
     def on_tab_changed(self, event):
         try:
@@ -134,9 +135,31 @@ class Window(tk.Frame):
     def show_search_result(self, search):
         if search == "Grafiek van de grootte van de appels":
             data = pd.read_csv('../Data/apple_quality.csv')
-            tab = ttk.Frame(self.notebook)
-            self.notebook.add(tab, text=search)
-            self.plot_graph(data, tab)
+            # Check if the tab already exists
+            existing_tab = None
+            for tab_id in self.notebook.tabs():
+                if self.notebook.tab(tab_id, "text") == search:
+                    existing_tab = self.notebook.nametowidget(tab_id)
+                    break
+
+
+            if existing_tab:
+                # If the tab already exists, select it and clear the existing graph
+                self.notebook.select(existing_tab)
+                if existing_tab.winfo_children():
+                    self.clear_graph(existing_tab)
+                self.plot_graph(data, self.notebook.nametowidget(existing_tab))
+            else:
+                # If the tab doesn't exist, create a new one and plot the graph
+                tab = ttk.Frame(self.notebook)
+                self.notebook.add(tab, text=search)
+                self.plot_graph(data, tab)
+
+    def clear_graph(self, parent):
+        # Destroy all widgets (i.e., the graph) inside the parent frame
+        for widget in parent.winfo_children():
+            widget.destroy()
+
 
     def plot_graph(self, data, parent):
         fig = Figure(figsize=(10, 6), dpi=100)
