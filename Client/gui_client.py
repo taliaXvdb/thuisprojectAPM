@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from PIL import Image, ImageTk
 import pandas as pd
 
 
@@ -148,7 +149,6 @@ class Window(tk.Frame):
 
     def show_search_result(self, search):
         if search == "Grafiek van de grootte van de appels":
-            data = pd.read_csv('../Data/apple_quality.csv')
             # Check if the tab already exists
             existing_tab = None
             for tab_id in self.notebook.tabs():
@@ -162,12 +162,12 @@ class Window(tk.Frame):
                 self.notebook.select(existing_tab)
                 if existing_tab.winfo_children():
                     self.clear_graph(existing_tab)
-                self.plot_graph(data, self.notebook.nametowidget(existing_tab))
+                self.show_image(self.notebook.nametowidget(existing_tab))
             else:
                 # If the tab doesn't exist, create a new one and plot the graph
-                tab = ttk.Frame(self.notebook)
+                tab = ttk.Frame(self.notebook, padding=2)
                 self.notebook.add(tab, text=search)
-                self.plot_graph(data, tab)
+                self.show_image(tab)
 
     def clear_graph(self, parent):
         # Destroy all widgets (i.e., the graph) inside the parent frame
@@ -175,19 +175,17 @@ class Window(tk.Frame):
             widget.destroy()
 
 
-    def plot_graph(self, data, parent):
-        fig = Figure(figsize=(10, 6), dpi=100)
-        plot = fig.add_subplot(1, 1, 1)
+    def show_image(self, parent):
+        # Load an image
+        img = Image.open("../size_plot.png")
+        img = img.resize((1200, 800))
+        img = ImageTk.PhotoImage(img)
 
-        for column in data.columns[1:-1]:  
-            plot.plot(data['A_id'], data['Size'], marker='o', label=column)
+        # Create a label to display the image
+        label = tk.Label(parent, image=img)
+        label.image = img
+        label.pack()
 
-        plot.set_xlabel('Id')
-        plot.set_ylabel('Size')
-
-        canvas = FigureCanvasTkAgg(fig, master=parent)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
     def logout(self):
         self.close_connection()
