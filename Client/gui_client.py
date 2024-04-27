@@ -135,6 +135,8 @@ class Window(Frame):
         messagebox.showinfo("Search", f"Searching for {search}...")
 
         try:
+            if hasattr(self, 'plot_canvas'):
+                self.plot_canvas.get_tk_widget().destroy()
             logging.info("Sending search data to server...")
             search_to_send = pickle.dumps(("SEARCH", search))
             pickle.dump(search_to_send, self.in_out_server)
@@ -171,9 +173,9 @@ class Window(Frame):
         plot.set_xlabel('Id')
         plot.set_ylabel('Size')
 
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+        self.plot_canvas = FigureCanvasTkAgg(fig, master=root)
+        self.plot_canvas.draw()
+        self.plot_canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
 logging.basicConfig(level=logging.INFO)
 
