@@ -14,6 +14,9 @@ from tkinter import *
 
 from tkinter import messagebox
 from tkinter.ttk import Combobox
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import pandas as pd
 
 
 class Window(Frame):
@@ -144,12 +147,33 @@ class Window(Frame):
             logging.info(f"Commando received: {commando}")
             if commando == "OK":
                 messagebox.showinfo("Search", "Search succesful")
+                self.show_search(search)
             else:
                 messagebox.showinfo("Search", "Search failed")
         except Exception as ex:
             logging.error(f"Foutmelding Client: {ex}")
             messagebox.showinfo("Foutmelding", "Something has gone wrong...")
 
+    def show_search(self, search):
+        if search == "Grafiek van de grootte van de appels":
+            data = pd.read_csv('../Data/apple_quality.csv')
+            self.plot_graph(data)
+
+    
+    def plot_graph(self, data):
+        fig = Figure(figsize=(10, 6), dpi=100)
+        plot = fig.add_subplot(1, 1, 1)
+
+        # Plot each column against the 'A_id' column
+        for column in data.columns[1:-1]:  # Exclude 'A_id' and 'Quality'
+            plot.plot(data['A_id'], data['Size'], marker='o', label=column)
+
+        plot.set_xlabel('Id')
+        plot.set_ylabel('Size')
+
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
 logging.basicConfig(level=logging.INFO)
 

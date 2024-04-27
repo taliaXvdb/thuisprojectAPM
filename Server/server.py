@@ -80,13 +80,6 @@ class ProjectServer(threading.Thread):
                     client.send_message(message)
                     return True
         return False
-    
-    def get_searches(self):
-        with self.lock:
-            searches = []
-            for client in self.clients:
-                searches.extend(client.get_searches())
-            return searches
         
     def shutdown(self):
         self.stop_server()

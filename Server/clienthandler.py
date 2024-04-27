@@ -78,3 +78,4 @@ class ClientHandler(threading.Thread):
             self.print_bericht_gui_server("wauw krokant")
 
         return
+    
