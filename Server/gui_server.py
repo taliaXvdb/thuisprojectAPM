@@ -6,6 +6,7 @@ from queue import Queue
 from threading import Thread, enumerate
 from tkinter import *
 from tkinter import messagebox, ttk
+import pandas as pd
 import sys
 from pathlib import Path
 print(sys.path[0])                  #test
@@ -44,6 +45,26 @@ class ServerWindow(Frame):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=BOTH, expand=1)
 
+        pages = [
+            "Logs",
+            "Popularity",
+            "Online users",
+            "Userbase",
+            "Message"
+        ]
+
+        self.tabs = {}  # Initialize tabs dictionary here
+
+        # Create tabs for each search
+        for page in pages:
+            tab = ttk.Frame(self.notebook)
+            self.notebook.add(tab, text=page)
+            self.tabs[page] = tab
+
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+        self.show_results("Logs")
+
 
     def start_stop_server(self):
         if self.server is not None:
@@ -63,56 +84,33 @@ class ServerWindow(Frame):
         self.server.start()  # in thread plaatsen!
         logging.info("Server started")
         self.btn_text.set("Stop server")
-        self.show_tabs()
 
     def init_messages_queue(self):
         self.messages_queue = Queue()
-        self.thread_listener_queue = Thread(target=self.print_messsages_from_queue, name="Queue_listener_thread", daemon=True)
+        self.thread_listener_queue = Thread(target=self.print_messages_from_queue, name="Queue_listener_thread", daemon=True)
         self.thread_listener_queue.start()
 
-    def print_messsages_from_queue(self):
+
+    def print_messages_from_queue(self):
         message = self.messages_queue.get()
         while message != "CLOSE_SERVER":
-            self.lstnumbers.insert(END, message)
+            self.lstnumbers.insert(END, message + '\n')  # Insert the message into the Text widget
             self.messages_queue.task_done()
             message = self.messages_queue.get()
 
-    def show_tabs(self):
-        self.tab1 = Frame(self.notebook)
-        self.notebook.add(self.tab1, text="Logs")
-        self.notebook.pack(fill=BOTH, expand=1)
-
-        self.lstnumbers = Listbox(self.tab1)
-        self.lstnumbers.pack(fill=BOTH, expand=1)
-
-        self.tab2 = Frame(self.notebook)
-        self.notebook.add(self.tab2, text="Popularity")
-        self.notebook.pack(fill=BOTH, expand=1)
-
-        self.tab3 = Frame(self.notebook)
-        self.notebook.add(self.tab3, text="Online users")
-        self.notebook.pack(fill=BOTH, expand=1)
-
-        self.tab4 = Frame(self.notebook)
-        self.notebook.add(self.tab4, text="Userbase")
-        self.notebook.pack(fill=BOTH, expand=1)
-
-        self.tab5 = Frame(self.notebook)
-        self.notebook.add(self.tab5, text="Message")
-        self.notebook.pack(fill=BOTH, expand=1)
-
-        self.lstusers = Listbox(self.tab2)
-        self.lstusers.pack(fill=BOTH, expand=1)
-
-        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
     def on_tab_changed(self, event):
         tab_id = event.widget.select()
         tab_name = event.widget.tab(tab_id, "text")
         print(tab_name)
+        self.show_results(tab_name)
 
+    def show_results(self, tab_name):
         if tab_name == "Logs":
-            self.print_messsages_from_queue()
+            self.init_messages_queue()
+            tab = self.tabs[tab_name]  # Get tab object
+            self.lstnumbers = Text(tab, wrap=WORD)
+            self.lstnumbers.pack(fill=Y, expand=True)
 
         elif tab_name == "Popularity":
             self.show_popularity()
@@ -126,8 +124,27 @@ class ServerWindow(Frame):
         elif tab_name == "Message":
             self.send_message()
 
+
     def show_popularity(self):
-        pass
+        usedbase = pd.read_csv("./Data/usedbase.csv")
+        tab = self.tabs["Popularity"]
+        self.tree = ttk.Treeview(tab)
+        self.tree.pack(fill=BOTH, expand=1)
+        self.tree["columns"] = ("Overview", "Prediction", "Sweetness", "Crunchiness")
+        self.tree.column("#0", width=0, stretch=NO)
+        self.tree.column("Overview", anchor=W, width=100)
+        self.tree.column("Prediction", anchor=W, width=100)
+        self.tree.column("Sweetness", anchor=W, width=100)
+        self.tree.column("Crunchiness", anchor=W, width=100)
+        self.tree.heading("#0", text="", anchor=W)
+        self.tree.heading("Overview", text="Overview", anchor=W)
+        self.tree.heading("Prediction", text="Prediction", anchor=W)
+        self.tree.heading("Sweetness", text="Sweetness", anchor=W)
+        self.tree.heading("Crunchiness", text="Crunchiness", anchor=W)
+
+        for index, row in usedbase.iterrows():
+            self.tree.insert("", index, text="Entry" + str(index), values=(row["Overview"], row["Prediction"], row["Sweetness"], row["Crunchiness"]))
+        self.tree.pack()
 
     def show_online_users(self):
         pass
