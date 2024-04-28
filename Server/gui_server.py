@@ -147,10 +147,37 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def show_online_users(self):
-        pass
+        tab = self.tabs["Online users"]
+        self.tree = ttk.Treeview(tab)
+        self.tree.pack(fill=BOTH, expand=1)
+        self.tree["columns"] = ("Username", "IP address", "Port")
+        self.tree.column("#0", width=0, stretch=NO)
+        self.tree.column("Username", anchor=W, width=100)
+        self.tree.column("IP address", anchor=W, width=100)
+        self.tree.column("Port", anchor=W, width=100)
+        self.tree.heading("#0", text="", anchor=W)
+        self.tree.heading("Username", text="Username", anchor=W)
+        self.tree.heading("IP address", text="IP address", anchor=W)
+        self.tree.heading("Port", text="Port", anchor=W)
 
     def show_userbase(self):
-        pass
+        userbase = pd.read_csv("./Data/userbase.csv")
+        tab = self.tabs["Userbase"]
+        self.tree = ttk.Treeview(tab)
+        self.tree.pack(fill=BOTH, expand=1)
+        self.tree["columns"] = ("Name", "Username", "Email")
+        self.tree.column("#0", width=0, stretch=NO)
+        self.tree.column("Name", anchor=W, width=100)
+        self.tree.column("Username", anchor=W, width=100)
+        self.tree.column("Email", anchor=W, width=100)
+        self.tree.heading("#0", text="", anchor=W)
+        self.tree.heading("Name", text="Name", anchor=W)
+        self.tree.heading("Username", text="Username", anchor=W)
+        self.tree.heading("Email", text="Email", anchor=W)
+
+        for index, row in userbase.iterrows():
+            self.tree.insert("", index, text="Entry" + str(index), values=(row["Name"], row["Username"], row["Email"]))
+        self.tree.pack()
 
     def send_message(self):
         pass
