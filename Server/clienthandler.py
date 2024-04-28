@@ -1,6 +1,7 @@
 import threading
 
 import pickle
+import pandas as pd
 
 
 class ClientHandler(threading.Thread):
@@ -57,19 +58,25 @@ class ClientHandler(threading.Thread):
     
     def search(self, search):
         self.print_bericht_gui_server(f"Search {search}")
-        print("DEBUG:", search)
+        usedbase = pd.read_csv("../Data/usedbase.csv")
 
         if search == "Overview":
             self.print_bericht_gui_server("wauw grafiek")
+            usedbase['Overview'] += 1
 
         elif search == "Prediction":
             self.print_bericht_gui_server("wauw kwaliteit")
+            usedbase['Prediction'] += 1
 
         elif search == "Sweetness":
             self.print_bericht_gui_server("wauw zoet")
+            usedbase['Sweetness'] += 1
 
         elif search == "Crunchiness":
             self.print_bericht_gui_server("wauw krokant")
+            usedbase['Crunchiness'] += 1
+
+        usedbase.to_csv("../Data/usedbase.csv", index=False)
 
         return
     
