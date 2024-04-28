@@ -21,17 +21,20 @@ class Window(tk.Frame):
         self.master.title("Login")
         self.pack(fill=tk.BOTH, expand=1)
 
-        tk.Label(self, text="Naam:").grid(row=0)
-        tk.Label(self, text="Wachtwoord:", pady=10).grid(row=1)
+        tk.Label(self, text="Username:").grid(row=0)
+        tk.Label(self, text="Password:", pady=10).grid(row=1)
 
-        self.entry_naam = tk.Entry(self, width=40)
-        self.entry_wachtwoord = tk.Entry(self, width=40, show="*")
+        self.entry_username = tk.Entry(self, width=40)
+        self.entry_password = tk.Entry(self, width=40, show="*")
 
-        self.entry_naam.grid(row=0, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
-        self.entry_wachtwoord.grid(row=1, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 0))
+        self.entry_username.grid(row=0, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
+        self.entry_password.grid(row=1, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 0))
 
         self.button_login = tk.Button(self, text="Login", command=self.login)
         self.button_login.grid(row=3, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+        self.button_register = tk.Button(self, text="Register", command=self.register)
+        self.button_register.grid(row=4, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
 
         tk.Grid.rowconfigure(self, 3, weight=1)
         tk.Grid.columnconfigure(self, 1, weight=1)
@@ -62,11 +65,11 @@ class Window(tk.Frame):
             logging.error("Error: Failed to close connection with server")
 
     def login(self):
-        naam = self.entry_naam.get()
-        wachtwoord = self.entry_wachtwoord.get()
+        username = self.entry_username.get()
+        password = self.entry_password.get()
         try:
             logging.info("Sending login data to server...")
-            login_to_send = pickle.dumps(("LOGIN", (naam, wachtwoord)))
+            login_to_send = pickle.dumps(("LOGIN", (username, password)))
             pickle.dump(login_to_send, self.in_out_server)
             self.in_out_server.flush()
             logging.info("Login data sent to server successfully")
@@ -79,10 +82,59 @@ class Window(tk.Frame):
             if commando == "OK":
                 result = messagebox.showinfo("Login", "Login successful")
                 if result == "ok":
-                    self.current_user = naam
+                    self.current_user = username
                     self.show_main_window()
             else:
                 messagebox.showinfo("Login", "Login failed")
+
+        except Exception as ex:
+            logging.error(f"Error: {ex}")
+            messagebox.showinfo("Error", "Something has gone wrong...")
+
+    def register(self):
+        for widget in self.winfo_children():
+            logging.info("Close current window")
+            widget.destroy()
+        
+        self.master.title("Register")
+        self.pack(fill=tk.BOTH, expand=1)
+
+        tk.Label(self, text="Username:").grid(row=0)
+        tk.Label(self, text="Password:", pady=10).grid(row=1)
+
+        self.entry_username = tk.Entry(self, width=40)
+        self.entry_password = tk.Entry(self, width=40, show="*")
+
+        self.entry_username.grid(row=0, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
+        self.entry_password.grid(row=1, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 0))
+
+        self.button_register = tk.Button(self, text="Register", command=self.register_user)
+        self.button_register.grid(row=3, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+        tk.Grid.rowconfigure(self, 3, weight=1)
+        tk.Grid.columnconfigure(self, 1, weight=1)
+
+    def register_user(self):
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+        try:
+            logging.info("Sending register data to server...")
+            register_to_send = pickle.dumps(("REGISTER", (username, password)))
+            pickle.dump(register_to_send, self.in_out_server)
+            self.in_out_server.flush()
+            logging.info("Register data sent to server successfully")
+
+            logging.info("Waiting for response from server...")
+
+            commando = pickle.load(self.in_out_server)
+            logging.info(f"Command received: {commando}")
+
+            if commando == "OK":
+                result = messagebox.showinfo("Register", "Register successful")
+                if result == "ok":
+                    self.show_main_window()
+            else:
+                messagebox.showinfo("Register", "Register failed")
 
         except Exception as ex:
             logging.error(f"Error: {ex}")

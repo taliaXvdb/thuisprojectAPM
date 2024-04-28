@@ -30,9 +30,14 @@ class ClientHandler(threading.Thread):
             message, data = pickle.loads(commando)
             
             if message == "LOGIN":
-                naam, wachtwoord = data
+                username, password = data
                 self.print_bericht_gui_server("Login...")
-                self.login(naam, wachtwoord)
+                self.login(username, password)
+
+            elif message == "REGISTER":
+                username, password = data
+                self.print_bericht_gui_server("Register...")
+                self.register(username, password)
 
             elif message == "SEARCH":
                 search = data
@@ -47,16 +52,39 @@ class ClientHandler(threading.Thread):
     def print_bericht_gui_server(self, message):
         self.messages_queue.put(f"CLH {self.id}:> {message}")
     
-    def login(self, naam, wachtwoord):
-        if naam == "admin" and wachtwoord == "admin":
+    def login(self, username, password):
+        userbase = pd.read_csv("./Data/userbase.csv")
+
+        if username in userbase['Username'].values and password in userbase['Password'].values:
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
+
         else:
-            self.print_bericht_gui_server(f"NOK")
-            pickle.dump("NOK", self.socket_to_client)
+            self.print_bericht_gui_server(f"Login failed")
+            pickle.dump("Login failed", self.socket_to_client)
             self.socket_to_client.flush()
+
         return
+    
+    def register(self, username, password):
+        userbase = pd.read_csv("./Data/userbase.csv")
+
+        if username in userbase['Username'].values:
+            self.print_bericht_gui_server("Username already exists")
+            pickle.dump("Username already exists", self.socket_to_client)
+            self.socket_to_client.flush()
+        else:
+            # Create a new DataFrame with the new data and concatenate it with the existing DataFrame
+            new_data = pd.DataFrame({'Username': [username], 'Password': [password]})
+            userbase = pd.concat([userbase, new_data], ignore_index=True)
+            userbase.to_csv("./Data/userbase.csv", index=False)
+            self.print_bericht_gui_server("OK")
+            pickle.dump("OK", self.socket_to_client)
+            self.socket_to_client.flush()
+
+        return
+
     
     def search(self, search):
         self.print_bericht_gui_server(f"Search {search}")
