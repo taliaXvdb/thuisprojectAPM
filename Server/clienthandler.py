@@ -20,27 +20,30 @@ class ClientHandler(threading.Thread):
     def run(self):
         self.socket_to_client = self.socket_to_client.makefile(mode='rwb')
 
-        self.print_bericht_gui_server("Waiting for login...")
-        commando = pickle.load(self.socket_to_client)
-        print(commando)
-        self.print_bericht_gui_server(f"Commando received: {commando}")
+        while True:
+            commando = pickle.load(self.socket_to_client)
+            print(commando)
+            self.print_bericht_gui_server(f"Commando received: {commando}")
 
-        while commando != "CLOSE":
-            message, (naam, wachtwoord) = pickle.loads(commando)
-            message, search = pickle.loads(commando)
+            if commando == "CLOSE":
+                break
 
+            message, data = pickle.loads(commando)
+            
             if message == "LOGIN":
+                naam, wachtwoord = data
                 self.print_bericht_gui_server("Login...")
                 self.login(naam, wachtwoord)
 
             elif message == "SEARCH":
+                search = data
                 self.print_bericht_gui_server("Search...")
                 self.search(search)
 
-            previous_command = commando
-
         self.print_bericht_gui_server("Connection with client closed...")
         self.socket_to_client.close()
+
+
 
     def print_bericht_gui_server(self, message):
         self.messages_queue.put(f"CLH {self.id}:> {message}")
@@ -58,7 +61,7 @@ class ClientHandler(threading.Thread):
     
     def search(self, search):
         self.print_bericht_gui_server(f"Search {search}")
-        usedbase = pd.read_csv("../Data/usedbase.csv")
+        usedbase = pd.read_csv("./Data/usedbase.csv")
 
         if search == "Overview":
             self.print_bericht_gui_server("wauw grafiek")
@@ -76,7 +79,7 @@ class ClientHandler(threading.Thread):
             self.print_bericht_gui_server("wauw krokant")
             usedbase['Crunchiness'] += 1
 
-        usedbase.to_csv("../Data/usedbase.csv", index=False)
+        usedbase.to_csv("./Data/usedbase.csv", index=False)
 
         return
     
