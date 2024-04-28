@@ -99,7 +99,7 @@ class Window(tk.Frame):
         self.top_bar = tk.Frame(self)  # Frame for the top bar
         self.top_bar.pack(side=tk.TOP, fill=tk.X)
 
-        self.label_user = tk.Label(self.top_bar, text=f"Ingelogd als: {self.current_user}")
+        self.label_user = tk.Label(self.top_bar, text=f"Welcome: {self.current_user}")
         self.label_user.pack(side=tk.LEFT, padx=(5, 5))
 
         self.button_logout = tk.Button(self.top_bar, text="Logout", command=self.logout)
@@ -111,10 +111,10 @@ class Window(tk.Frame):
 
         # Define a list of all possible searches
         searches = [
-            "Grafiek van de grootte van de appels",
-            "Heeft de appel met deze rijpheid een goede kwaliteit",
-            "Hoe zoet is de appel met deze zuurtegraad",
-            "Hoe krokant is een appel met deze rijpheid"
+            "Overview",
+            "Prediction",
+            "Sweetness",
+            "Crunchiness",
         ]
 
         # Create tabs for each search
@@ -148,7 +148,7 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def show_search_result(self, search):
-        if search == "Grafiek van de grootte van de appels":
+        if search == "Overview":
             # Check if the tab already exists
             existing_tab = None
             for tab_id in self.notebook.tabs():

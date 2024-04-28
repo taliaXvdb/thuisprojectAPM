@@ -43,12 +43,6 @@ class ClientHandler(threading.Thread):
 
     def print_bericht_gui_server(self, message):
         self.messages_queue.put(f"CLH {self.id}:> {message}")
-
-    def get_info(self):
-        return {
-            "id": self.id,
-            "status": "Active" if self.is_alive() else "Inactive"
-        }
     
     def login(self, naam, wachtwoord):
         if naam == "admin" and wachtwoord == "admin":
@@ -65,16 +59,16 @@ class ClientHandler(threading.Thread):
         self.print_bericht_gui_server(f"Search {search}")
         print("DEBUG:", search)
 
-        if search == "Grafiek van de grootte van de appels":
+        if search == "Overview":
             self.print_bericht_gui_server("wauw grafiek")
 
-        elif search == "Heeft de appel met deze rijpheid een goede kwaliteit":
+        elif search == "Prediction":
             self.print_bericht_gui_server("wauw kwaliteit")
 
-        elif search == "Hoe zoet is de appel met deze zuurtegraad":
+        elif search == "Sweetness":
             self.print_bericht_gui_server("wauw zoet")
 
-        elif search == "Hoe krokant is een appel met deze rijpheid":
+        elif search == "Crunchiness":
             self.print_bericht_gui_server("wauw krokant")
 
         return
