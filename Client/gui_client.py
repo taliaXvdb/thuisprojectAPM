@@ -92,34 +92,44 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def register(self):
+        # Destroy widgets from the login window
         for widget in self.winfo_children():
-            logging.info("Close current window")
             widget.destroy()
-        
+
+        # Create widgets for the registration window
         self.master.title("Register")
         self.pack(fill=tk.BOTH, expand=1)
 
-        tk.Label(self, text="Username:").grid(row=0)
-        tk.Label(self, text="Password:", pady=10).grid(row=1)
+        tk.Label(self, text="Name:").grid(row=0)
+        tk.Label(self, text="Username:").grid(row=1)
+        tk.Label(self, text="Email:").grid(row=2)
+        tk.Label(self, text="Password:", pady=10).grid(row=3)
 
+        self.entry_name = tk.Entry(self, width=40)
         self.entry_username = tk.Entry(self, width=40)
+        self.entry_email = tk.Entry(self, width=40)
         self.entry_password = tk.Entry(self, width=40, show="*")
 
-        self.entry_username.grid(row=0, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
-        self.entry_password.grid(row=1, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 0))
+        self.entry_name.grid(row=0, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
+        self.entry_username.grid(row=1, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
+        self.entry_email.grid(row=2, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 5))
+        self.entry_password.grid(row=3, column=1, sticky=tk.E + tk.W, padx=(5, 5), pady=(5, 0))
 
         self.button_register = tk.Button(self, text="Register", command=self.register_user)
-        self.button_register.grid(row=3, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+        self.button_register.grid(row=4, column=0, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
 
-        tk.Grid.rowconfigure(self, 3, weight=1)
+        tk.Grid.rowconfigure(self, 4, weight=1)
         tk.Grid.columnconfigure(self, 1, weight=1)
 
+
     def register_user(self):
+        name = self.entry_name.get()
         username = self.entry_username.get()
+        email = self.entry_email.get()
         password = self.entry_password.get()
         try:
             logging.info("Sending register data to server...")
-            register_to_send = pickle.dumps(("REGISTER", (username, password)))
+            register_to_send = pickle.dumps(("REGISTER", (name, username, email, password)))
             pickle.dump(register_to_send, self.in_out_server)
             self.in_out_server.flush()
             logging.info("Register data sent to server successfully")
@@ -132,6 +142,7 @@ class Window(tk.Frame):
             if commando == "OK":
                 result = messagebox.showinfo("Register", "Register successful")
                 if result == "ok":
+                    self.current_user = username
                     self.show_main_window()
             else:
                 messagebox.showinfo("Register", "Register failed")

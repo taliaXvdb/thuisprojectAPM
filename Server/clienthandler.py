@@ -36,9 +36,9 @@ class ClientHandler(threading.Thread):
                 self.login(username, password)
 
             elif message == "REGISTER":
-                username, password = data
+                name, username, email, password = data
                 self.print_bericht_gui_server("Register...")
-                self.register(username, password)
+                self.register(name, username, email, password)
 
             elif message == "SEARCH":
                 search = data
@@ -83,7 +83,7 @@ class ClientHandler(threading.Thread):
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         return hashed_password
 
-    def register(self, username, password):
+    def register(self, name, username, email, password):
         userbase = pd.read_csv("./Data/userbase.csv")
 
         if username in userbase['Username'].values:
@@ -93,7 +93,7 @@ class ClientHandler(threading.Thread):
         else:
             # Hash the password before storing it
             hashed_password = self.hash_password(password)
-            new_data = pd.DataFrame({'Username': [username], 'Password': [hashed_password]})
+            new_data = pd.DataFrame({'Name': [name], 'Username': [username], 'Email': [email], 'Password': [hashed_password]})
             userbase = pd.concat([userbase, new_data], ignore_index=True)
             userbase.to_csv("./Data/userbase.csv", index=False)
             self.print_bericht_gui_server("OK")
