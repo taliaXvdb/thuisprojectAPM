@@ -23,7 +23,6 @@ class ClientHandler(threading.Thread):
         while True:
             commando = pickle.load(self.socket_to_client)
             print(commando)
-            self.print_bericht_gui_server(f"Commando received: {commando}")
 
             if commando == "CLOSE":
                 break
@@ -64,28 +63,24 @@ class ClientHandler(threading.Thread):
         usedbase = pd.read_csv("./Data/usedbase.csv")
 
         if search == "Overview":
-            self.print_bericht_gui_server("wauw grafiek")
             usedbase['Overview'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Prediction":
-            self.print_bericht_gui_server("wauw kwaliteit")
             usedbase['Prediction'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Sweetness":
-            self.print_bericht_gui_server("wauw zoet")
             usedbase['Sweetness'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Crunchiness":
-            self.print_bericht_gui_server("wauw krokant")
             usedbase['Crunchiness'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
