@@ -124,6 +124,8 @@ class Window(tk.Frame):
 
         # Bind the tab changed event
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+        self.show_search_result("Overview")
         
 
     def on_tab_changed(self, event):
@@ -140,6 +142,7 @@ class Window(tk.Frame):
             commando = pickle.load(self.in_out_server)
             logging.info(f"Command received: {commando}")
             if commando == "OK":
+                logging.info("Search successful")
                 self.show_search_result(selected_tab_text)
             else:
                 messagebox.showinfo("Search", "Search failed")
@@ -149,39 +152,33 @@ class Window(tk.Frame):
 
     def show_search_result(self, search):
         if search == "Overview":
-            # Check if the tab already exists
             existing_tab = None
             for tab_id in self.notebook.tabs():
                 if self.notebook.tab(tab_id, "text") == search:
                     existing_tab = self.notebook.nametowidget(tab_id)
                     break
 
-
             if existing_tab:
-                # If the tab already exists, select it and clear the existing graph
                 self.notebook.select(existing_tab)
                 if existing_tab.winfo_children():
-                    self.clear_graph(existing_tab)
+                    self.clear_image(existing_tab)
                 self.show_image(self.notebook.nametowidget(existing_tab))
+
             else:
-                # If the tab doesn't exist, create a new one and plot the graph
                 tab = ttk.Frame(self.notebook, padding=2)
                 self.notebook.add(tab, text=search)
                 self.show_image(tab)
 
-    def clear_graph(self, parent):
-        # Destroy all widgets (i.e., the graph) inside the parent frame
+    def clear_image(self, parent):
         for widget in parent.winfo_children():
             widget.destroy()
 
 
     def show_image(self, parent):
-        # Load an image
         img = Image.open("../size_plot.png")
         img = img.resize((1200, 800))
         img = ImageTk.PhotoImage(img)
 
-        # Create a label to display the image
         label = tk.Label(parent, image=img)
         label.image = img
         label.pack()
