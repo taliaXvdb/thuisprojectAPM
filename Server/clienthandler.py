@@ -45,6 +45,18 @@ class ClientHandler(threading.Thread):
                 self.print_bericht_gui_server("Search...")
                 self.search(search)
 
+            elif message == "PREDICTION":
+                size, weight, sweetness, crunchiness, juiciness, ripeness, acidity = data
+                self.print_bericht_gui_server("Prediction...")
+                self.do_prediction(size, weight, sweetness, crunchiness, juiciness, ripeness, acidity)
+
+            elif message == "Server Message":
+                self.print_bericht_gui_server("Server message...")
+                self.print_bericht_gui_server(data)
+                send_message = pickle.dumps(("Server Message", data))
+                pickle.dump(send_message, self.socket_to_client)
+                self.socket_to_client.flush()
+
         self.print_bericht_gui_server("Connection with client closed...")
         self.socket_to_client.close()
 
@@ -135,4 +147,15 @@ class ClientHandler(threading.Thread):
         usedbase.to_csv("./Data/usedbase.csv", index=False)
 
         return
+    
+    def do_prediction(self, size, weight, sweetness, crunchiness, juiciness, ripeness, acidity):
+        apples = pd.read_csv("./Data/apple_quality.csv")
+        # search the apple with the given characteristics
+        apple = apples.loc[(apples['Size'] == size) & (apples['Weight'] == weight) & (apples['Sweetness'] == sweetness) & (apples['Crunchiness'] == crunchiness) & (apples['Juiciness'] == juiciness) & (apples['Ripeness'] == ripeness) & (apples['Acidity'] == acidity)]
+        # get the prediction
+        prediction = apple['Quality'].values[0]
+        self.print_bericht_gui_server(f"Prediction: {prediction}")
+        send_prediction = pickle.dumps(("Predicted", prediction))
+        pickle.dump(send_prediction, self.socket_to_client)
+        self.socket_to_client.flush()
     

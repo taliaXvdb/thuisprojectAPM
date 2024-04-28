@@ -232,6 +232,54 @@ class Window(tk.Frame):
                 self.notebook.add(tab, text=search)
                 self.show_image(tab)
 
+        elif search == "Prediction":
+            prediction_frame = tk.Frame(self)
+            prediction_frame.pack()
+
+            # make a prediction by filling in all the different variables
+            tk.Label(prediction_frame, text="Size:").grid(row=0, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Weight:").grid(row=1, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Sweetness:").grid(row=2, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Crunchiness:").grid(row=3, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Juiciness:").grid(row=4, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Ripeness:").grid(row=5, column=0, sticky=tk.E)
+            tk.Label(prediction_frame, text="Acidity:").grid(row=6, column=0, sticky=tk.E)
+
+            self.entry_size = tk.Entry(prediction_frame, width=40)
+            self.entry_size.insert(0, "7.0")
+            self.entry_weight = tk.Entry(prediction_frame, width=40)
+            self.entry_weight.insert(0, "85.0")
+            self.entry_sweetness = tk.Entry(prediction_frame, width=40)
+            self.entry_sweetness.insert(0, "8.0")
+            self.entry_crunchiness = tk.Entry(prediction_frame, width=40)
+            self.entry_crunchiness.insert(0, "8.0")
+            self.entry_juiciness = tk.Entry(prediction_frame, width=40)
+            self.entry_juiciness.insert(0, "8.0")
+            self.entry_ripeness = tk.Entry(prediction_frame, width=40)
+            self.entry_ripeness.insert(0, "8.0")
+            self.entry_acidity = tk.Entry(prediction_frame, width=40)
+            self.entry_acidity.insert(0, "7.5")
+
+            self.entry_size.grid(row=0, column=1)
+            self.entry_weight.grid(row=1, column=1)
+            self.entry_sweetness.grid(row=2, column=1)
+            self.entry_crunchiness.grid(row=3, column=1)
+            self.entry_juiciness.grid(row=4, column=1)
+            self.entry_ripeness.grid(row=5, column=1)
+            self.entry_acidity.grid(row=6, column=1)
+
+            self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict)
+            self.button_predict.grid(row=7, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+            tk.Grid.rowconfigure(prediction_frame, 7, weight=1)
+            tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
+
+        elif search == "Sweetness":
+            pass
+
+        elif search == "Crunchiness":
+            pass
+
     def clear_image(self, parent):
         for widget in parent.winfo_children():
             widget.destroy()
@@ -245,6 +293,41 @@ class Window(tk.Frame):
         label = tk.Label(parent, image=img)
         label.image = img
         label.pack()
+
+    def predict(self):
+        size = float(self.entry_size.get())
+        weight = float(self.entry_weight.get())
+        sweetness = float(self.entry_sweetness.get())
+        crunchiness = float(self.entry_crunchiness.get())
+        juiciness = float(self.entry_juiciness.get())
+        ripeness = float(self.entry_ripeness.get())
+        acidity = float(self.entry_acidity.get())
+
+        try:
+            logging.info("Sending prediction data to server...")
+            prediction_to_send = pickle.dumps(("PREDICTION", (size, weight, sweetness, crunchiness, juiciness, ripeness, acidity)))
+            pickle.dump(prediction_to_send, self.in_out_server)
+            self.in_out_server.flush()
+            logging.info("Prediction data sent to server successfully")
+
+            logging.info("Waiting for response from server...")
+
+            commando = pickle.load(self.in_out_server)
+            logging.info(f"Command received: {commando}")
+            message, data = pickle.loads(commando)
+
+            if message == "Predicted":
+                #show the data in the window
+                label = tk.Label(self, text=f"Prediction: {data}")
+                label.pack()
+
+            else:
+                messagebox.showinfo("Prediction", "Prediction failed")
+
+
+        except Exception as ex:
+            logging.error(f"Error: {ex}")
+            messagebox.showinfo("Error", "Something has gone wrong...")
 
 
     def logout(self):

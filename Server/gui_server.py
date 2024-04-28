@@ -9,6 +9,7 @@ from tkinter import messagebox, ttk
 import pandas as pd
 import sys
 from pathlib import Path
+import pickle
 print(sys.path[0])                  #test
 sys.path[0] = str(Path(sys.path[0]).parent)      #Hier aanpassen
 print(sys.path[0])    
@@ -180,4 +181,15 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def send_message(self):
-        pass
+        # type a message and send it to the clienthandler
+        tab = self.tabs["Message"]
+        self.message = Entry(tab)
+        self.message.pack(side=LEFT)
+        self.send_button = Button(tab, text="Send", command=self.send_message_to_client)
+        self.send_button.pack(side=RIGHT)
+
+    def send_message_to_client(self):
+        message = self.message.get()
+        message_to_send = pickle.dumps(("Server Message", message))
+        pickle.dump(message_to_send, self.in_out_server)
+        self.in_out_server.flush()
