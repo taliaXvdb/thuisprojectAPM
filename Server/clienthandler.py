@@ -2,6 +2,7 @@ import threading
 
 import pickle
 import pandas as pd
+import hashlib
 
 
 class ClientHandler(threading.Thread):
@@ -55,18 +56,33 @@ class ClientHandler(threading.Thread):
     def login(self, username, password):
         userbase = pd.read_csv("./Data/userbase.csv")
 
-        if username in userbase['Username'].values and password in userbase['Password'].values:
-            self.print_bericht_gui_server(f"OK")
-            pickle.dump("OK", self.socket_to_client)
-            self.socket_to_client.flush()
+        if username in userbase['Username'].values:
+            # Get the hashed password corresponding to the entered username
+            hashed_password = userbase.loc[userbase['Username'] == username, 'Password'].values[0]
 
-        else:
-            self.print_bericht_gui_server(f"Login failed")
-            pickle.dump("Login failed", self.socket_to_client)
-            self.socket_to_client.flush()
+            # Hash the entered password
+            entered_password_hashed = self.hash_password(password)
+
+            # Compare the hashed passwords
+            if entered_password_hashed == hashed_password:
+                self.print_bericht_gui_server("OK")
+                pickle.dump("OK", self.socket_to_client)
+                self.socket_to_client.flush()
+                return
+        self.print_bericht_gui_server("Login failed")
+        pickle.dump("Login failed", self.socket_to_client)
+        self.socket_to_client.flush()
 
         return
+
     
+    import hashlib
+
+    def hash_password(self, password):
+        # Use SHA-256 hashing algorithm
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        return hashed_password
+
     def register(self, username, password):
         userbase = pd.read_csv("./Data/userbase.csv")
 
@@ -75,8 +91,9 @@ class ClientHandler(threading.Thread):
             pickle.dump("Username already exists", self.socket_to_client)
             self.socket_to_client.flush()
         else:
-            # Create a new DataFrame with the new data and concatenate it with the existing DataFrame
-            new_data = pd.DataFrame({'Username': [username], 'Password': [password]})
+            # Hash the password before storing it
+            hashed_password = self.hash_password(password)
+            new_data = pd.DataFrame({'Username': [username], 'Password': [hashed_password]})
             userbase = pd.concat([userbase, new_data], ignore_index=True)
             userbase.to_csv("./Data/userbase.csv", index=False)
             self.print_bericht_gui_server("OK")
@@ -84,6 +101,7 @@ class ClientHandler(threading.Thread):
             self.socket_to_client.flush()
 
         return
+
 
     
     def search(self, search):
