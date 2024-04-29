@@ -3,10 +3,7 @@ import socket
 import pickle
 import tkinter as tk
 from tkinter import messagebox, ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
 from PIL import Image, ImageTk
-import pandas as pd
 
 
 class Window(tk.Frame):
@@ -16,6 +13,7 @@ class Window(tk.Frame):
         self.init_window()
         self.make_connection_with_server()
         self.current_user = None
+        self.widgets_by_tab = {}  # Dictionary to store widgets associated with each tab
 
     def init_window(self):
         self.master.title("Login")
@@ -171,7 +169,6 @@ class Window(tk.Frame):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill=tk.BOTH, expand=1)
 
-
         # Define a list of all possible searches
         searches = [
             "Overview",
@@ -182,8 +179,9 @@ class Window(tk.Frame):
 
         # Create tabs for each search
         for search in searches:
-            tab = ttk.Frame(self.notebook)
+            tab = ttk.Frame(self.notebook, padding=0)
             self.notebook.add(tab, text=search)
+            self.widgets_by_tab[search] = tab  # Store the tab reference
 
         # Bind the tab changed event
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
@@ -214,65 +212,15 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def show_search_result(self, search):
+        # Clear the frame associated with the current tab
+        for widget in self.widgets_by_tab[search].winfo_children():
+            widget.destroy()
+
         if search == "Overview":
-            existing_tab = None
-            for tab_id in self.notebook.tabs():
-                if self.notebook.tab(tab_id, "text") == search:
-                    existing_tab = self.notebook.nametowidget(tab_id)
-                    break
-
-            if existing_tab:
-                self.notebook.select(existing_tab)
-                if existing_tab.winfo_children():
-                    self.clear_image(existing_tab)
-                self.show_image(self.notebook.nametowidget(existing_tab))
-
-            else:
-                tab = ttk.Frame(self.notebook, padding=2)
-                self.notebook.add(tab, text=search)
-                self.show_image(tab)
+            self.show_image(self.widgets_by_tab[search])
 
         elif search == "Prediction":
-            prediction_frame = tk.Frame(self)
-            prediction_frame.pack()
-
-            # make a prediction by filling in all the different variables
-            tk.Label(prediction_frame, text="Size:").grid(row=0, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Weight:").grid(row=1, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Sweetness:").grid(row=2, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Crunchiness:").grid(row=3, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Juiciness:").grid(row=4, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Ripeness:").grid(row=5, column=0, sticky=tk.E)
-            tk.Label(prediction_frame, text="Acidity:").grid(row=6, column=0, sticky=tk.E)
-
-            self.entry_size = tk.Entry(prediction_frame, width=40)
-            self.entry_size.insert(0, "7.0")
-            self.entry_weight = tk.Entry(prediction_frame, width=40)
-            self.entry_weight.insert(0, "85.0")
-            self.entry_sweetness = tk.Entry(prediction_frame, width=40)
-            self.entry_sweetness.insert(0, "8.0")
-            self.entry_crunchiness = tk.Entry(prediction_frame, width=40)
-            self.entry_crunchiness.insert(0, "8.0")
-            self.entry_juiciness = tk.Entry(prediction_frame, width=40)
-            self.entry_juiciness.insert(0, "8.0")
-            self.entry_ripeness = tk.Entry(prediction_frame, width=40)
-            self.entry_ripeness.insert(0, "8.0")
-            self.entry_acidity = tk.Entry(prediction_frame, width=40)
-            self.entry_acidity.insert(0, "7.5")
-
-            self.entry_size.grid(row=0, column=1)
-            self.entry_weight.grid(row=1, column=1)
-            self.entry_sweetness.grid(row=2, column=1)
-            self.entry_crunchiness.grid(row=3, column=1)
-            self.entry_juiciness.grid(row=4, column=1)
-            self.entry_ripeness.grid(row=5, column=1)
-            self.entry_acidity.grid(row=6, column=1)
-
-            self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict)
-            self.button_predict.grid(row=7, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
-
-            tk.Grid.rowconfigure(prediction_frame, 7, weight=1)
-            tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
+            self.show_prediction(self.widgets_by_tab[search])
 
         elif search == "Sweetness":
             pass
@@ -280,19 +228,56 @@ class Window(tk.Frame):
         elif search == "Crunchiness":
             pass
 
-    def clear_image(self, parent):
-        for widget in parent.winfo_children():
-            widget.destroy()
-
-
     def show_image(self, parent):
         img = Image.open("../size_plot.png")
-        img = img.resize((1200, 800))
+        img = img.resize((1000, 600))
         img = ImageTk.PhotoImage(img)
 
         label = tk.Label(parent, image=img)
         label.image = img
         label.pack()
+
+    def show_prediction(self, parent):
+        prediction_frame = tk.Frame(parent)
+        prediction_frame.pack()
+
+        # make a prediction by filling in all the different variables
+        tk.Label(prediction_frame, text="Size:").grid(row=0, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Weight:").grid(row=1, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Sweetness:").grid(row=2, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Crunchiness:").grid(row=3, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Juiciness:").grid(row=4, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Ripeness:").grid(row=5, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Acidity:").grid(row=6, column=0, sticky=tk.E)
+
+        self.entry_size = tk.Entry(prediction_frame, width=40)
+        self.entry_size.insert(0, "7.0")
+        self.entry_weight = tk.Entry(prediction_frame, width=40)
+        self.entry_weight.insert(0, "85.0")
+        self.entry_sweetness = tk.Entry(prediction_frame, width=40)
+        self.entry_sweetness.insert(0, "8.0")
+        self.entry_crunchiness = tk.Entry(prediction_frame, width=40)
+        self.entry_crunchiness.insert(0, "8.0")
+        self.entry_juiciness = tk.Entry(prediction_frame, width=40)
+        self.entry_juiciness.insert(0, "8.0")
+        self.entry_ripeness = tk.Entry(prediction_frame, width=40)
+        self.entry_ripeness.insert(0, "8.0")
+        self.entry_acidity = tk.Entry(prediction_frame, width=40)
+        self.entry_acidity.insert(0, "7.5")
+
+        self.entry_size.grid(row=0, column=1)
+        self.entry_weight.grid(row=1, column=1)
+        self.entry_sweetness.grid(row=2, column=1)
+        self.entry_crunchiness.grid(row=3, column=1)
+        self.entry_juiciness.grid(row=4, column=1)
+        self.entry_ripeness.grid(row=5, column=1)
+        self.entry_acidity.grid(row=6, column=1)
+
+        self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict)
+        self.button_predict.grid(row=7, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+        tk.Grid.rowconfigure(prediction_frame, 7, weight=1)
+        tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
 
     def predict(self):
         size = float(self.entry_size.get())
@@ -317,18 +302,16 @@ class Window(tk.Frame):
             message, data = pickle.loads(commando)
 
             if message == "Predicted":
-                #show the data in the window
+                # Show the data in the window
                 label = tk.Label(self, text=f"Prediction: {data}")
                 label.pack()
 
             else:
                 messagebox.showinfo("Prediction", "Prediction failed")
 
-
         except Exception as ex:
             logging.error(f"Error: {ex}")
             messagebox.showinfo("Error", "Something has gone wrong...")
-
 
     def logout(self):
         self.close_connection()
