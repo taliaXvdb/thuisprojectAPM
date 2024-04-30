@@ -118,7 +118,7 @@ class ClientHandler(threading.Thread):
         else:
             # Hash the password before storing it
             hashed_password = self.hash_password(password)
-            new_data = pd.DataFrame({'Name': [name], 'Username': [username], 'Email': [email], 'Password': [hashed_password]})
+            new_data = pd.DataFrame({'Name': [name], 'Username': [username], 'Email': [email], 'Password': [hashed_password], 'Overview': 0,'Prediction': 0,'Sweetness': 0,'Crunchiness': 0})
             userbase = pd.concat([userbase, new_data], ignore_index=True)
             userbase.to_csv("./Data/userbase.csv", index=False)
             self.usernames = username
@@ -133,32 +133,39 @@ class ClientHandler(threading.Thread):
     def search(self, search):
         self.print_bericht_gui_server(f"Search {search}")
         usedbase = pd.read_csv("./Data/usedbase.csv")
+        userbase = pd.read_csv("./Data/userbase.csv")
 
         if search == "Overview":
             usedbase['Overview'] += 1
+            print("Data type of 'Overview' column:", userbase['Overview'].dtype)
+            userbase.loc[userbase['Username'] == self.username, 'Overview'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Prediction":
             usedbase['Prediction'] += 1
+            userbase.loc[userbase['Username'] == self.username, 'Prediction'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Sweetness":
             usedbase['Sweetness'] += 1
+            userbase.loc[userbase['Username'] == self.username, 'Sweetness'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         elif search == "Crunchiness":
             usedbase['Crunchiness'] += 1
+            userbase.loc[userbase['Username'] == self.username, 'Crunchiness'] += 1
             self.print_bericht_gui_server(f"OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
 
         usedbase.to_csv("./Data/usedbase.csv", index=False)
+        userbase.to_csv("./Data/userbase.csv", index=False)
 
         return
     
