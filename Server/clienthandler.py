@@ -18,6 +18,8 @@ class ClientHandler(threading.Thread):
         self.id = ClientHandler.numbers_clienthandlers
         ClientHandler.numbers_clienthandlers += 1
 
+        self.username = None
+
     def run(self):
         self.socket_to_client = self.socket_to_client.makefile(mode='rwb')
 
@@ -87,6 +89,7 @@ class ClientHandler(threading.Thread):
 
             # Compare the hashed passwords
             if entered_password_hashed == hashed_password:
+                self.username = username
                 self.print_bericht_gui_server("OK")
                 pickle.dump("OK", self.socket_to_client)
                 self.socket_to_client.flush()
@@ -118,6 +121,7 @@ class ClientHandler(threading.Thread):
             new_data = pd.DataFrame({'Name': [name], 'Username': [username], 'Email': [email], 'Password': [hashed_password]})
             userbase = pd.concat([userbase, new_data], ignore_index=True)
             userbase.to_csv("./Data/userbase.csv", index=False)
+            self.usernames = username
             self.print_bericht_gui_server("OK")
             pickle.dump("OK", self.socket_to_client)
             self.socket_to_client.flush()
@@ -182,3 +186,6 @@ class ClientHandler(threading.Thread):
         send_prediction = pickle.dumps(("Predicted", prediction))
         pickle.dump(send_prediction, self.socket_to_client)
         self.socket_to_client.flush()
+
+    def get_username(self):
+        return self.username

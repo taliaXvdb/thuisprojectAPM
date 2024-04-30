@@ -54,11 +54,11 @@ class ProjectServer(threading.Thread):
                 socket_to_client, addr = self.serversocket.accept()
                 self.addr = addr
                 self.print_bericht_gui_server(f"Got a connection from {addr}")
-                clh = ClientHandler(socket_to_client, self.messages_queue)
-                clh.start()
+                self.clh = ClientHandler(socket_to_client, self.messages_queue)
+                self.clh.start()
                 self.print_bericht_gui_server(f"Current Thread count: {threading.active_count()}.")
                 with self.lock:
-                    self.clients.append(clh)
+                    self.clients.append(self.clh)
 
         except Exception as ex:
             self.print_bericht_gui_server("Serversocket afgesloten")
@@ -93,8 +93,9 @@ class ProjectServer(threading.Thread):
         self.messages_queue.put(f"CLH :> {message}")
 
     def get_info(self):
+        username = self.clh.get_username()
         logged_in = pd.read_csv("./Data/logged_in.csv")
         print(logged_in)
-        new_data = pd.DataFrame({'Username': self.host, 'IP': self.addr[0], 'Port': self.port}, index=[0])
+        new_data = pd.DataFrame({'Username': username, 'IP': self.addr[0], 'Port': self.port}, index=[0])
         logged_in = pd.concat([logged_in, new_data], ignore_index=True)
         logged_in.to_csv("./Data/logged_in.csv", index=False)
