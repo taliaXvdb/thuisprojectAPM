@@ -4,6 +4,7 @@ import threading
 from queue import Queue
 import sys
 from pathlib import Path
+import pandas as pd
 print(sys.path[0])                  #test
 sys.path[0] = str(Path(sys.path[0]).parent)      #Hier aanpassen
 print(sys.path[0])    
@@ -20,7 +21,7 @@ class ProjectServer(threading.Thread):
         self.clients = []
         self.lock = threading.Lock()
         self.messages_queue = messages_queue
-
+        self.addr = None
 
     @property
     def is_connected(self):
@@ -51,6 +52,7 @@ class ProjectServer(threading.Thread):
 
                 # establish a connection
                 socket_to_client, addr = self.serversocket.accept()
+                self.addr = addr
                 self.print_bericht_gui_server(f"Got a connection from {addr}")
                 clh = ClientHandler(socket_to_client, self.messages_queue)
                 clh.start()
@@ -64,7 +66,7 @@ class ProjectServer(threading.Thread):
 
     def get_clients(self):
         with self.lock:
-            return [client.get_info() for client in self.clients]
+            return [self.get_info() for client in self.clients]
         
     def get_client_data(self, client_id):
         with self.lock:
@@ -90,4 +92,9 @@ class ProjectServer(threading.Thread):
     def print_bericht_gui_server(self, message):
         self.messages_queue.put(f"CLH :> {message}")
 
-
+    def get_info(self):
+        logged_in = pd.read_csv("./Data/logged_in.csv")
+        print(logged_in)
+        new_data = pd.DataFrame({'Username': self.host, 'IP': self.addr[0], 'Port': self.port}, index=[0])
+        logged_in = pd.concat([logged_in, new_data], ignore_index=True)
+        logged_in.to_csv("./Data/logged_in.csv", index=False)

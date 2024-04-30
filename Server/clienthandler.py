@@ -182,4 +182,3 @@ class ClientHandler(threading.Thread):
         send_prediction = pickle.dumps(("Predicted", prediction))
         pickle.dump(send_prediction, self.socket_to_client)
         self.socket_to_client.flush()
-    

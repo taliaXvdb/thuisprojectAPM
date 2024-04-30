@@ -148,6 +148,9 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def show_online_users(self):
+        self.server.get_info()
+        clients = pd.read_csv("./Data/logged_in.csv")
+
         tab = self.tabs["Online users"]
         self.tree = ttk.Treeview(tab)
         self.tree.pack(fill=BOTH, expand=1)
@@ -160,6 +163,10 @@ class ServerWindow(Frame):
         self.tree.heading("Username", text="Username", anchor=W)
         self.tree.heading("IP address", text="IP address", anchor=W)
         self.tree.heading("Port", text="Port", anchor=W)
+
+        for index, row in clients.iterrows():
+            self.tree.insert("", index, text="Entry" + str(index), values=(row["Username"], row["IP"], row["Port"]))
+        self.tree.pack()
 
     def show_userbase(self):
         userbase = pd.read_csv("./Data/userbase.csv")
