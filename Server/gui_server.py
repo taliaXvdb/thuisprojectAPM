@@ -131,7 +131,21 @@ class ServerWindow(Frame):
 
     def show_popularity(self):
         usedbase = pd.read_csv("./Data/usedbase.csv")
+        userbase = pd.read_csv("./Data/userbase.csv")
         tab = self.tabs["Popularity"]
+        
+        #dropdown menu to select all users or one of the users
+        self.variable = StringVar(tab)
+        self.variable.set("All users")  # default value
+
+        options = []
+        options.append("All users")
+        for user in userbase["Username"]:
+            options.append(user)
+
+        self.dropdown = OptionMenu(tab, self.variable, *options)
+        self.dropdown.pack()
+
         self.tree = ttk.Treeview(tab)
         self.tree.pack(fill=BOTH, expand=1)
         self.tree["columns"] = ("Overview", "Prediction", "Sweetness", "Crunchiness")
@@ -146,8 +160,26 @@ class ServerWindow(Frame):
         self.tree.heading("Sweetness", text="Sweetness", anchor=W)
         self.tree.heading("Crunchiness", text="Crunchiness", anchor=W)
 
+
         for index, row in usedbase.iterrows():
             self.tree.insert("", index, text="Entry" + str(index), values=(row["Overview"], row["Prediction"], row["Sweetness"], row["Crunchiness"]))
+        self.tree.pack()
+
+        self.variable.trace_add("write", self.trace_change)
+
+    def trace_change(self, *args):
+        lookup = self.variable.get()
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        if lookup != "All users":
+            userbase = pd.read_csv("./Data/userbase.csv")
+            user = userbase[userbase["Username"] == lookup]
+            self.tree.insert("", 0, text="Entry" + str(0), values=(user["Overview"].values[0], user["Prediction"].values[0], user["Sweetness"].values[0], user["Crunchiness"].values[0]))
+        
+        else:
+            usedbase = pd.read_csv("./Data/usedbase.csv")
+            for index, row in usedbase.iterrows():
+                self.tree.insert("", index, text="Entry" + str(index), values=(row["Overview"], row["Prediction"], row["Sweetness"], row["Crunchiness"]))
         self.tree.pack()
 
     def show_online_users(self):
