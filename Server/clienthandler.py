@@ -48,7 +48,17 @@ class ClientHandler(threading.Thread):
             elif message == "PREDICTION":
                 size, weight, sweetness, crunchiness, juiciness, ripeness, acidity = data
                 self.print_bericht_gui_server("Prediction...")
-                self.do_prediction(size, weight, sweetness, crunchiness, juiciness, ripeness, acidity)
+                self.do_prediction("prediction", size, weight, sweetness, crunchiness, juiciness, ripeness, acidity)
+
+            elif message == "SWEETNESS":
+                acidity = data
+                self.print_bericht_gui_server("Sweetness...")
+                self.do_prediction("sweetness", 0, 0, 0, 0, 0, 0, acidity)
+
+            elif message == "CRUNCHINESS":
+                ripeness = data
+                self.print_bericht_gui_server("Crunchiness...")
+                self.do_prediction("crunchiness", 0, 0, 0, 0, 0, ripeness, 0)
 
             elif message == "Server Message":
                 self.print_bericht_gui_server("Server message...")
@@ -148,12 +158,26 @@ class ClientHandler(threading.Thread):
 
         return
     
-    def do_prediction(self, size, weight, sweetness, crunchiness, juiciness, ripeness, acidity):
+    def do_prediction(self, type, size, weight, sweetness, crunchiness, juiciness, ripeness, acidity):
         apples = pd.read_csv("./Data/apple_quality.csv")
-        # search the apple with the given characteristics
-        apple = apples.loc[(apples['Size'] == size) & (apples['Weight'] == weight) & (apples['Sweetness'] == sweetness) & (apples['Crunchiness'] == crunchiness) & (apples['Juiciness'] == juiciness) & (apples['Ripeness'] == ripeness) & (apples['Acidity'] == acidity)]
-        # get the prediction
-        prediction = apple['Quality'].values[0]
+
+        if type == "prediction":
+            # search the apple with the given characteristics
+            apple = apples.loc[(apples['Size'] == size) & (apples['Weight'] == weight) & (apples['Sweetness'] == sweetness) & (apples['Crunchiness'] == crunchiness) & (apples['Juiciness'] == juiciness) & (apples['Ripeness'] == ripeness) & (apples['Acidity'] == acidity)]
+            # get the prediction
+            prediction = apple['Quality'].values[0]
+        elif type == "sweetness":
+            # search the apple with the given acidity
+            apple = apples.loc[apples['Acidity'] == acidity]
+            # get the sweetness
+            prediction = apple['Sweetness'].values[0]
+
+        elif type == "crunchiness":
+            # search the apple with the given ripeness
+            apple = apples.loc[apples['Ripeness'] == ripeness]
+            # get the crunchiness
+            prediction = apple['Crunchiness'].values[0]
+        
         self.print_bericht_gui_server(f"Prediction: {prediction}")
         send_prediction = pickle.dumps(("Predicted", prediction))
         pickle.dump(send_prediction, self.socket_to_client)

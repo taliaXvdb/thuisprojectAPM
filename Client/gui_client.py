@@ -211,10 +211,17 @@ class Window(tk.Frame):
             logging.error(f"Error: {ex}")
             messagebox.showinfo("Error", "Something has gone wrong...")
 
+    def clear_labels(self):
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.destroy()
+
     def show_search_result(self, search):
         # Clear the frame associated with the current tab
         for widget in self.widgets_by_tab[search].winfo_children():
             widget.destroy()
+
+        self.clear_labels()
 
         if search == "Overview":
             self.show_image(self.widgets_by_tab[search])
@@ -223,10 +230,10 @@ class Window(tk.Frame):
             self.show_prediction(self.widgets_by_tab[search])
 
         elif search == "Sweetness":
-            pass
+            self.show_sweetness(self.widgets_by_tab[search])
 
         elif search == "Crunchiness":
-            pass
+            self.show_crunchiness(self.widgets_by_tab[search])
 
     def show_image(self, parent):
         img = Image.open("../size_plot.png")
@@ -308,6 +315,98 @@ class Window(tk.Frame):
 
             else:
                 messagebox.showinfo("Prediction", "Prediction failed")
+
+        except Exception as ex:
+            logging.error(f"Error: {ex}")
+            messagebox.showinfo("Error", "Something has gone wrong...")
+
+    def show_sweetness(self, parent):
+        prediction_frame = tk.Frame(parent)
+        prediction_frame.pack()
+
+        # make a prediction by filling in all the different variables
+        tk.Label(prediction_frame, text="Acidity:").grid(row=0, column=0, sticky=tk.E)
+
+        self.entry_acidity = tk.Entry(prediction_frame, width=40)
+
+        self.entry_acidity.grid(row=0, column=1)
+        self.entry_acidity.insert(0, "7.5")
+
+        self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict_sweetness)
+        self.button_predict.grid(row=1, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+        tk.Grid.rowconfigure(prediction_frame, 1, weight=1)
+        tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
+
+    def predict_sweetness(self):
+        acidity = float(self.entry_acidity.get())
+
+        try:
+            logging.info("Sending sweetness data to server...")
+            prediction_to_send = pickle.dumps(("SWEETNESS", acidity))
+            pickle.dump(prediction_to_send, self.in_out_server)
+            self.in_out_server.flush()
+            logging.info("Sweetness data sent to server successfully")
+
+            logging.info("Waiting for response from server...")
+
+            commando = pickle.load(self.in_out_server)
+            logging.info(f"Command received: {commando}")
+            message, data = pickle.loads(commando)
+
+            if message == "Predicted":
+                # Show the data in the window
+                label = tk.Label(self, text=f"Sweetness: {data}")
+                label.pack()
+
+            else:
+                messagebox.showinfo("Sweetness", "Sweetness failed")
+
+        except Exception as ex:
+            logging.error(f"Error: {ex}")
+            messagebox.showinfo("Error", "Something has gone wrong...")
+
+    def show_crunchiness(self, parent):
+        prediction_frame = tk.Frame(parent)
+        prediction_frame.pack()
+
+        # make a prediction by filling in all the different variables
+        tk.Label(prediction_frame, text="Acidity:").grid(row=0, column=0, sticky=tk.E)
+
+        self.entry_ripeness = tk.Entry(prediction_frame, width=40)
+
+        self.entry_ripeness.grid(row=0, column=1)
+        self.entry_ripeness.insert(0, "8.0")
+
+        self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict_crunchiness)
+        self.button_predict.grid(row=1, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+
+        tk.Grid.rowconfigure(prediction_frame, 1, weight=1)
+        tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
+
+    def predict_crunchiness(self):
+        ripeness = float(self.entry_ripeness.get())
+
+        try:
+            logging.info("Sending crunchiness data to server...")
+            prediction_to_send = pickle.dumps(("CRUNCHINESS", ripeness))
+            pickle.dump(prediction_to_send, self.in_out_server)
+            self.in_out_server.flush()
+            logging.info("Crunchiness data sent to server successfully")
+
+            logging.info("Waiting for response from server...")
+
+            commando = pickle.load(self.in_out_server)
+            logging.info(f"Command received: {commando}")
+            message, data = pickle.loads(commando)
+
+            if message == "Predicted":
+                # Show the data in the window
+                label = tk.Label(self, text=f"Crunchiness: {data}")
+                label.pack()
+
+            else:
+                messagebox.showinfo("Crunchiness", "Crunchiness failed")
 
         except Exception as ex:
             logging.error(f"Error: {ex}")
