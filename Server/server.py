@@ -34,6 +34,8 @@ class ProjectServer(threading.Thread):
         self.serversocket.listen(5)
         self.__is_connected = True
         self.print_bericht_gui_server("SERVER STARTED")
+        logged_in = pd.read_csv("./Data/logged_in.csv")
+        logged_in.iloc[0:0].to_csv("./Data/logged_in.csv", index=False)
 
     def stop_server(self):
         if self.serversocket is not None:

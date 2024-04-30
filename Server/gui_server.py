@@ -107,6 +107,9 @@ class ServerWindow(Frame):
         self.show_results(tab_name)
 
     def show_results(self, tab_name):
+        for widget in self.tabs[tab_name].winfo_children():
+            widget.destroy()
+
         if tab_name == "Logs":
             self.init_messages_queue()
             tab = self.tabs[tab_name]  # Get tab object
