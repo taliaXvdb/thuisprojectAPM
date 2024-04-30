@@ -371,7 +371,7 @@ class Window(tk.Frame):
         prediction_frame.pack()
 
         # make a prediction by filling in all the different variables
-        tk.Label(prediction_frame, text="Ripeness:").grid(row=0, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Acidity:").grid(row=0, column=0, sticky=tk.E)
 
         self.entry_ripeness = tk.Entry(prediction_frame, width=40)
 
