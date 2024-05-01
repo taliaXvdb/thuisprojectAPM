@@ -363,7 +363,10 @@ class Window(tk.Frame):
 
             if message == "Predicted":
                 # Show the data in the window
-                label = tk.Label(self, text=f"Sweetness: {data}")
+                if data < 6.0:
+                    label = tk.Label(self, text=f"Sweetness: {data} the apple is sour")
+                else:
+                    label = tk.Label(self, text=f"Sweetness: {data}, the apple is sweet")
                 label.pack()
 
             else:
@@ -411,7 +414,10 @@ class Window(tk.Frame):
 
             if message == "Predicted":
                 # Show the data in the window
-                label = tk.Label(self, text=f"Crunchiness: {data}")
+                if data < 6.0:
+                    label = tk.Label(self, text=f"Crunchiness: {data} the apple is soft")
+                else:
+                    label = tk.Label(self, text=f"Crunchiness: {data}, the apple is crunchy")
                 label.pack()
 
             else:
