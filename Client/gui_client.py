@@ -240,6 +240,9 @@ class Window(tk.Frame):
         img = img.resize((1000, 600))
         img = ImageTk.PhotoImage(img)
 
+        # add text above the image
+        label = tk.Label(parent, text="Here you can see an overview of the size of the apples devided in good and bad quality")
+        label.pack()
         label = tk.Label(parent, image=img)
         label.image = img
         label.pack()
@@ -248,14 +251,16 @@ class Window(tk.Frame):
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
+        tk.Label(prediction_frame, text="Give up some parameters to see if it's a good or bad apple:").grid(row=1, column=0, sticky=tk.E)
+
         # make a prediction by filling in all the different variables
-        tk.Label(prediction_frame, text="Size:").grid(row=0, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Weight:").grid(row=1, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Sweetness:").grid(row=2, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Crunchiness:").grid(row=3, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Juiciness:").grid(row=4, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Ripeness:").grid(row=5, column=0, sticky=tk.E)
-        tk.Label(prediction_frame, text="Acidity:").grid(row=6, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Size:").grid(row=2, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Weight:").grid(row=3, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Sweetness:").grid(row=4, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Crunchiness:").grid(row=5, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Juiciness:").grid(row=6, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Ripeness:").grid(row=7, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Acidity:").grid(row=8, column=0, sticky=tk.E)
 
         self.entry_size = tk.Entry(prediction_frame, width=40)
         self.entry_size.insert(0, "7.0")
@@ -272,18 +277,18 @@ class Window(tk.Frame):
         self.entry_acidity = tk.Entry(prediction_frame, width=40)
         self.entry_acidity.insert(0, "7.5")
 
-        self.entry_size.grid(row=0, column=1)
-        self.entry_weight.grid(row=1, column=1)
-        self.entry_sweetness.grid(row=2, column=1)
-        self.entry_crunchiness.grid(row=3, column=1)
-        self.entry_juiciness.grid(row=4, column=1)
-        self.entry_ripeness.grid(row=5, column=1)
-        self.entry_acidity.grid(row=6, column=1)
+        self.entry_size.grid(row=2, column=1)
+        self.entry_weight.grid(row=3, column=1)
+        self.entry_sweetness.grid(row=4, column=1)
+        self.entry_crunchiness.grid(row=5, column=1)
+        self.entry_juiciness.grid(row=6, column=1)
+        self.entry_ripeness.grid(row=7, column=1)
+        self.entry_acidity.grid(row=8, column=1)
 
         self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict)
-        self.button_predict.grid(row=7, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+        self.button_predict.grid(row=9, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
 
-        tk.Grid.rowconfigure(prediction_frame, 7, weight=1)
+        tk.Grid.rowconfigure(prediction_frame, 9, weight=1)
         tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
 
     def predict(self):
@@ -310,7 +315,7 @@ class Window(tk.Frame):
 
             if message == "Predicted":
                 # Show the data in the window
-                label = tk.Label(self, text=f"Prediction: {data}")
+                label = tk.Label(self, text=f"The apple has a {data} quality")
                 label.pack()
 
             else:
@@ -324,19 +329,21 @@ class Window(tk.Frame):
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
+        tk.Label(prediction_frame, text="Give up an acidity level to see if the apple is sweet:").grid(row=1, column=0, sticky=tk.E)
+
         # make a prediction by filling in all the different variables
-        tk.Label(prediction_frame, text="Acidity:").grid(row=0, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Acidity:").grid(row=2, column=0, sticky=tk.E)
 
         self.entry_acidity = tk.Entry(prediction_frame, width=40)
 
-        self.entry_acidity.grid(row=0, column=1)
+        self.entry_acidity.grid(row=2, column=1)
         self.entry_acidity.insert(0, "7.5")
 
         self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict_sweetness)
-        self.button_predict.grid(row=1, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+        self.button_predict.grid(row=3, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
 
-        tk.Grid.rowconfigure(prediction_frame, 1, weight=1)
-        tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
+        tk.Grid.rowconfigure(prediction_frame, 3, weight=1)
+        tk.Grid.columnconfigure(prediction_frame, 3, weight=1)
 
     def predict_sweetness(self):
         acidity = float(self.entry_acidity.get())
@@ -370,18 +377,20 @@ class Window(tk.Frame):
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
+        tk.Label(prediction_frame, text="Give up a ripeness level to see if the apple is crunchy:").grid(row=1, column=0, sticky=tk.E)
+
         # make a prediction by filling in all the different variables
-        tk.Label(prediction_frame, text="Acidity:").grid(row=0, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Acidity:").grid(row=2, column=0, sticky=tk.E)
 
         self.entry_ripeness = tk.Entry(prediction_frame, width=40)
 
-        self.entry_ripeness.grid(row=0, column=1)
+        self.entry_ripeness.grid(row=2, column=1)
         self.entry_ripeness.insert(0, "8.0")
 
         self.button_predict = tk.Button(prediction_frame, text="Predict", command=self.predict_crunchiness)
-        self.button_predict.grid(row=1, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
+        self.button_predict.grid(row=3, columnspan=2, pady=(0, 5), padx=(5, 5), sticky=tk.N + tk.S + tk.E + tk.W)
 
-        tk.Grid.rowconfigure(prediction_frame, 1, weight=1)
+        tk.Grid.rowconfigure(prediction_frame, 3, weight=1)
         tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
 
     def predict_crunchiness(self):
