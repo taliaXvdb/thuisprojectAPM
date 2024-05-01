@@ -13,9 +13,10 @@ class Window(tk.Frame):
         self.init_window()
         self.make_connection_with_server()
         self.current_user = None
-        self.widgets_by_tab = {}  # Dictionary to store widgets associated with each tab
+        self.widgets_by_tab = {}
 
     def init_window(self):
+        # toont het login scherm
         self.master.title("Login")
         self.pack(fill=tk.BOTH, expand=1)
 
@@ -63,6 +64,7 @@ class Window(tk.Frame):
             logging.error("Error: Failed to close connection with server")
 
     def login(self):
+        # stuurt de login gegevens naar de server en wacht op een antwoord van de server
         username = self.entry_username.get()
         password = self.entry_password.get()
         try:
@@ -90,11 +92,11 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def register(self):
-        # Destroy widgets from the login window
+        # toont het registratie scherm
         for widget in self.winfo_children():
+            #verwijdert alle voorgaande windows
             widget.destroy()
 
-        # Create widgets for the registration window
         self.master.title("Register")
         self.pack(fill=tk.BOTH, expand=1)
 
@@ -121,6 +123,7 @@ class Window(tk.Frame):
 
 
     def register_user(self):
+        # stuurt de registratie gegevens naar de server en wacht op een antwoord van de server
         name = self.entry_name.get()
         username = self.entry_username.get()
         email = self.entry_email.get()
@@ -150,6 +153,7 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def show_main_window(self):
+        # toont het hoofdscherm
         logging.info("Close current window")
         for widget in self.winfo_children():
             widget.destroy()
@@ -157,7 +161,7 @@ class Window(tk.Frame):
         self.master.title("Main")
         self.pack(fill=tk.BOTH, expand=1)
 
-        self.top_bar = tk.Frame(self)  # Frame for the top bar
+        self.top_bar = tk.Frame(self)
         self.top_bar.pack(side=tk.TOP, fill=tk.X)
 
         self.label_user = tk.Label(self.top_bar, text=f"Welcome: {self.current_user}")
@@ -177,19 +181,18 @@ class Window(tk.Frame):
             "Crunchiness",
         ]
 
-        # Create tabs for each search
         for search in searches:
             tab = ttk.Frame(self.notebook, padding=0)
             self.notebook.add(tab, text=search)
-            self.widgets_by_tab[search] = tab  # Store the tab reference
+            self.widgets_by_tab[search] = tab
 
-        # Bind the tab changed event
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
         self.show_search_result("Overview")
         
 
     def on_tab_changed(self, event):
+        # kijkt welk tablad geselecteerd is
         try:
             selected_tab_index = event.widget.index("current")
             selected_tab_text = event.widget.tab(selected_tab_index, "text")
@@ -212,13 +215,15 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def clear_labels(self):
+        # verwqijdert alle labels zodat er geen labels van andere paginas blijven staan
         for widget in self.winfo_children():
             if isinstance(widget, tk.Label):
                 widget.destroy()
 
     def show_search_result(self, search):
-        # Clear the frame associated with the current tab
+        # toont de resultaten van de zoekopdracht
         for widget in self.widgets_by_tab[search].winfo_children():
+            # verwijdert de widgets van een ander tablad
             widget.destroy()
 
         self.clear_labels()
@@ -236,11 +241,11 @@ class Window(tk.Frame):
             self.show_crunchiness(self.widgets_by_tab[search])
 
     def show_image(self, parent):
+        # toont de afbeelding van de appels hun grootte
         img = Image.open("../size_plot.png")
         img = img.resize((1000, 600))
         img = ImageTk.PhotoImage(img)
 
-        # add text above the image
         label = tk.Label(parent, text="Here you can see an overview of the size of the apples devided in good and bad quality")
         label.pack()
         label = tk.Label(parent, image=img)
@@ -248,12 +253,12 @@ class Window(tk.Frame):
         label.pack()
 
     def show_prediction(self, parent):
+        # toont het voorspellings scherm
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
         tk.Label(prediction_frame, text="Give up some parameters to see if it's a good or bad apple:").grid(row=1, column=0, sticky=tk.E)
 
-        # make a prediction by filling in all the different variables
         tk.Label(prediction_frame, text="Size:").grid(row=2, column=0, sticky=tk.E)
         tk.Label(prediction_frame, text="Weight:").grid(row=3, column=0, sticky=tk.E)
         tk.Label(prediction_frame, text="Sweetness:").grid(row=4, column=0, sticky=tk.E)
@@ -292,6 +297,7 @@ class Window(tk.Frame):
         tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
 
     def predict(self):
+        # stuurt de voorspellings gegevens naar de server en wacht op een antwoord van de server
         size = float(self.entry_size.get())
         weight = float(self.entry_weight.get())
         sweetness = float(self.entry_sweetness.get())
@@ -314,7 +320,6 @@ class Window(tk.Frame):
             message, data = pickle.loads(commando)
 
             if message == "Predicted":
-                # Show the data in the window
                 label = tk.Label(self, text=f"The apple has a {data} quality")
                 label.pack()
 
@@ -326,12 +331,12 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def show_sweetness(self, parent):
+        # toont het zoetigheid scherm
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
         tk.Label(prediction_frame, text="Give up an acidity level to see if the apple is sweet:").grid(row=1, column=0, sticky=tk.E)
 
-        # make a prediction by filling in all the different variables
         tk.Label(prediction_frame, text="Acidity:").grid(row=2, column=0, sticky=tk.E)
 
         self.entry_acidity = tk.Entry(prediction_frame, width=40)
@@ -346,6 +351,7 @@ class Window(tk.Frame):
         tk.Grid.columnconfigure(prediction_frame, 3, weight=1)
 
     def predict_sweetness(self):
+        # stuurt de zoetigheid gegevens naar de server en wacht op een antwoord van de server
         acidity = float(self.entry_acidity.get())
 
         try:
@@ -362,7 +368,6 @@ class Window(tk.Frame):
             message, data = pickle.loads(commando)
 
             if message == "Predicted":
-                # Show the data in the window
                 if data < 6.0:
                     label = tk.Label(self, text=f"Sweetness: {data} the apple is sour")
                 else:
@@ -377,12 +382,12 @@ class Window(tk.Frame):
             messagebox.showinfo("Error", "Something has gone wrong...")
 
     def show_crunchiness(self, parent):
+        # toont het knapperigheid scherm
         prediction_frame = tk.Frame(parent)
         prediction_frame.pack()
 
         tk.Label(prediction_frame, text="Give up a ripeness level to see if the apple is crunchy:").grid(row=1, column=0, sticky=tk.E)
 
-        # make a prediction by filling in all the different variables
         tk.Label(prediction_frame, text="Acidity:").grid(row=2, column=0, sticky=tk.E)
 
         self.entry_ripeness = tk.Entry(prediction_frame, width=40)
@@ -397,6 +402,7 @@ class Window(tk.Frame):
         tk.Grid.columnconfigure(prediction_frame, 1, weight=1)
 
     def predict_crunchiness(self):
+        # stuurt de knapperigheid gegevens naar de server en wacht op een antwoord van de server
         ripeness = float(self.entry_ripeness.get())
 
         try:
@@ -413,7 +419,6 @@ class Window(tk.Frame):
             message, data = pickle.loads(commando)
 
             if message == "Predicted":
-                # Show the data in the window
                 if data < 6.0:
                     label = tk.Label(self, text=f"Crunchiness: {data} the apple is soft")
                 else:

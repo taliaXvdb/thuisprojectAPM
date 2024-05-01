@@ -24,15 +24,13 @@ class ServerWindow(Frame):
         self.thread_listener_queue=None
         self.init_messages_queue()
 
-    # Creation of init_window
     def init_window(self):
-        # changing the title of our master widget
+        # toont serverwindow
         self.master.title("Server")
 
-        # allowing the widget to take the full space of the root window
         self.pack(fill=BOTH, expand=1)
 
-        self.top_bar = Frame(self)  # Frame for the top bar
+        self.top_bar = Frame(self)
         self.top_bar.pack(side=TOP, fill=X)
 
         self.title = Label(self.top_bar, text="Server Application")
@@ -54,9 +52,8 @@ class ServerWindow(Frame):
             "Message"
         ]
 
-        self.tabs = {}  # Initialize tabs dictionary here
+        self.tabs = {}
 
-        # Create tabs for each search
         for page in pages:
             tab = ttk.Frame(self.notebook)
             self.notebook.add(tab, text=page)
@@ -95,24 +92,26 @@ class ServerWindow(Frame):
     def print_messages_from_queue(self):
         message = self.messages_queue.get()
         while message != "CLOSE_SERVER":
-            self.lstnumbers.insert(END, message + '\n')  # Insert the message into the Text widget
+            self.lstnumbers.insert(END, message + '\n')
             self.messages_queue.task_done()
             message = self.messages_queue.get()
 
 
     def on_tab_changed(self, event):
+        # kijkt wel tablad er geselecteerd is
         tab_id = event.widget.select()
         tab_name = event.widget.tab(tab_id, "text")
         print(tab_name)
         self.show_results(tab_name)
 
     def show_results(self, tab_name):
+        # toont de tabladen
         for widget in self.tabs[tab_name].winfo_children():
             widget.destroy()
 
         if tab_name == "Logs":
             self.init_messages_queue()
-            tab = self.tabs[tab_name]  # Get tab object
+            tab = self.tabs[tab_name]
             self.lstnumbers = Text(tab, wrap=WORD)
             self.lstnumbers.pack(fill=Y, expand=True)
 
@@ -130,13 +129,13 @@ class ServerWindow(Frame):
 
 
     def show_popularity(self):
+        # toont hoeveel een zoekopdracht al opgezocht is voor alle gebruikers en ook per gebruiker
         usedbase = pd.read_csv("./Data/usedbase.csv")
         userbase = pd.read_csv("./Data/userbase.csv")
         tab = self.tabs["Popularity"]
         
-        #dropdown menu to select all users or one of the users
         self.variable = StringVar(tab)
-        self.variable.set("All users")  # default value
+        self.variable.set("All users")
 
         options = []
         options.append("All users")
@@ -168,6 +167,7 @@ class ServerWindow(Frame):
         self.variable.trace_add("write", self.trace_change)
 
     def trace_change(self, *args):
+        # kijkt of er een andere gebruiker geselecteerd is
         lookup = self.variable.get()
         for i in self.tree.get_children():
             self.tree.delete(i)
@@ -183,6 +183,7 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def show_online_users(self):
+        # toont welke gebruikers online zijn
         self.server.get_info()
         clients = pd.read_csv("./Data/logged_in.csv")
 
@@ -204,6 +205,7 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def show_userbase(self):
+        # toont alle gebruikers
         userbase = pd.read_csv("./Data/userbase.csv")
         tab = self.tabs["Userbase"]
         self.tree = ttk.Treeview(tab)
@@ -223,7 +225,7 @@ class ServerWindow(Frame):
         self.tree.pack()
 
     def send_message(self):
-        # type a message and send it to the clienthandler
+        # poging om een bericht te versturen
         tab = self.tabs["Message"]
         self.message = Entry(tab)
         self.message.pack(side=LEFT)

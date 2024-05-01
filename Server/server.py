@@ -95,6 +95,7 @@ class ProjectServer(threading.Thread):
         self.messages_queue.put(f"CLH :> {message}")
 
     def get_info(self):
+        # vraagt de info van de gebruikers die ingelogd zijn op
         username = self.clh.get_username()
         logged_in = pd.read_csv("./Data/logged_in.csv")
         print(logged_in)

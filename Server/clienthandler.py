@@ -24,6 +24,7 @@ class ClientHandler(threading.Thread):
         self.socket_to_client = self.socket_to_client.makefile(mode='rwb')
 
         while True:
+            # kijkt welke messages binnenkomen, en voert de juiste actie uit
             commando = pickle.load(self.socket_to_client)
             print(commando)
 
@@ -78,16 +79,14 @@ class ClientHandler(threading.Thread):
         self.messages_queue.put(f"CLH {self.id}:> {message}")
     
     def login(self, username, password):
+        # kijkt of de gebruiker al in de database zit, zo ja, dan wordt er ingelogd
         userbase = pd.read_csv("./Data/userbase.csv")
 
         if username in userbase['Username'].values:
-            # Get the hashed password corresponding to the entered username
             hashed_password = userbase.loc[userbase['Username'] == username, 'Password'].values[0]
 
-            # Hash the entered password
             entered_password_hashed = self.hash_password(password)
 
-            # Compare the hashed passwords
             if entered_password_hashed == hashed_password:
                 self.username = username
                 self.print_bericht_gui_server("OK")
@@ -100,15 +99,13 @@ class ClientHandler(threading.Thread):
 
         return
 
-    
-    import hashlib
-
     def hash_password(self, password):
-        # Use SHA-256 hashing algorithm
+        # zorgen dat password niet in plain text in de database zit
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         return hashed_password
 
     def register(self, name, username, email, password):
+        # kijkt of de gebruiker al in de database zit, zo nee, dan wordt er een nieuwe gebruiker aangemaakt
         userbase = pd.read_csv("./Data/userbase.csv")
 
         if username in userbase['Username'].values:
@@ -116,7 +113,6 @@ class ClientHandler(threading.Thread):
             pickle.dump("Username already exists", self.socket_to_client)
             self.socket_to_client.flush()
         else:
-            # Hash the password before storing it
             hashed_password = self.hash_password(password)
             new_data = pd.DataFrame({'Name': [name], 'Username': [username], 'Email': [email], 'Password': [hashed_password], 'Overview': 0,'Prediction': 0,'Sweetness': 0,'Crunchiness': 0})
             userbase = pd.concat([userbase, new_data], ignore_index=True)
@@ -131,6 +127,7 @@ class ClientHandler(threading.Thread):
 
     
     def search(self, search):
+        # kijkt welke zoekopdracht de gebruiker heeft gedaan en past de userbase en usedbase aan
         self.print_bericht_gui_server(f"Search {search}")
         usedbase = pd.read_csv("./Data/usedbase.csv")
         userbase = pd.read_csv("./Data/userbase.csv")
@@ -170,23 +167,19 @@ class ClientHandler(threading.Thread):
         return
     
     def do_prediction(self, type, size, weight, sweetness, crunchiness, juiciness, ripeness, acidity):
+        # doet een voorspelling voor bepaalde parameters
         apples = pd.read_csv("./Data/apple_quality.csv")
 
         if type == "prediction":
-            # search the apple with the given characteristics
             apple = apples.loc[(apples['Size'] == size) & (apples['Weight'] == weight) & (apples['Sweetness'] == sweetness) & (apples['Crunchiness'] == crunchiness) & (apples['Juiciness'] == juiciness) & (apples['Ripeness'] == ripeness) & (apples['Acidity'] == acidity)]
-            # get the prediction
             prediction = apple['Quality'].values[0]
+
         elif type == "sweetness":
-            # search the apple with the given acidity
             apple = apples.loc[apples['Acidity'] == acidity]
-            # get the sweetness
             prediction = apple['Sweetness'].values[0]
 
         elif type == "crunchiness":
-            # search the apple with the given ripeness
             apple = apples.loc[apples['Ripeness'] == ripeness]
-            # get the crunchiness
             prediction = apple['Crunchiness'].values[0]
         
         self.print_bericht_gui_server(f"Prediction: {prediction}")
