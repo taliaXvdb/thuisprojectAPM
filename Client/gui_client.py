@@ -368,7 +368,7 @@ class Window(tk.Frame):
             message, data = pickle.loads(commando)
 
             if message == "Predicted":
-                if data < 6.0:
+                if data > 7.0:
                     label = tk.Label(self, text=f"Sweetness: {data} the apple is sour")
                 else:
                     label = tk.Label(self, text=f"Sweetness: {data}, the apple is sweet")
@@ -388,7 +388,7 @@ class Window(tk.Frame):
 
         tk.Label(prediction_frame, text="Give up a ripeness level to see if the apple is crunchy:").grid(row=1, column=0, sticky=tk.E)
 
-        tk.Label(prediction_frame, text="Acidity:").grid(row=2, column=0, sticky=tk.E)
+        tk.Label(prediction_frame, text="Ripeness:").grid(row=2, column=0, sticky=tk.E)
 
         self.entry_ripeness = tk.Entry(prediction_frame, width=40)
 
